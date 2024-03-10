@@ -1,5 +1,34 @@
 
+from constants import SIZE
+
+
 class Tape(list[int]):
     
-    def __init__(self) -> None:
-        pass
+    def __init__(self, size: int = SIZE) -> None:
+        super().__init__([0] * size)
+        
+        self.__pointer = 0
+    
+    @property
+    def byte(self) -> int:
+        return self[self.__pointer]
+    
+    @byte.setter
+    def byte(self, value: int) -> None:
+        self.set_value(value, self.__pointer)
+        
+    
+    def set_value(self, value: int, index: int | None = None) -> None:
+        self[index if index is not None else self.__pointer] = value & 255
+        
+    
+    def increase(self, ammount: int, index: int | None = None) -> None:
+        self.set_value((self[index] if index is not None else self.byte) + ammount, index)
+       
+        
+    def move(self, ammount: int = 1) -> None:
+        self.__pointer += ammount
+        
+    
+    def move_to(self, index: int) -> None:
+        self.__pointer = index
