@@ -5,7 +5,8 @@ from tape import Tape
 
 type Routine = list[tuple[Callable[[], None]] | 
                     tuple[Callable[[int], None], int] | 
-                    tuple[Callable[[int, int], None], int, int]]
+                    tuple[Callable[[int, int], None], int, int] |
+                    tuple[Callable[[Routine], None], Routine]]
 
 class Interpreter(Tape):
     
@@ -41,6 +42,18 @@ class Interpreter(Tape):
         return index
     
     
+    def execute_routine(self, routine: Routine) -> None:
+        
+        for a, *b in routine: 
+            a(*b) # type: ignore
+    
+    
+    def do_while(self, routine: Routine) -> None:
+        
+        while self.byte:
+            self.execute_routine(routine)
+    
+    
     def __parse(self, start: int | None = None, end: int | None = None) -> Routine:
         
         if start is None: start = 0
@@ -66,15 +79,8 @@ class Interpreter(Tape):
             
             inside_end = self.find_match(index)
             inside_routine = self.__parse(index + 1, inside_end) # +1 remove brackets, end is exclusive already
-
-            def inside() -> None:
-                
-                while self.byte:
-                
-                    for a, *b in inside_routine:
-                        a(*b)
             
-            routine.append((inside,))
+            routine.append((self.do_while, inside_routine))
             
             index = inside_end + 1
         
@@ -97,8 +103,7 @@ class Interpreter(Tape):
 
 
     def __run(self) -> list[int]:
-        
-        for a, *b in self.__parse():
-            a(*b)
+
+        self.execute_routine(self.__parse())
         
         return self.output
