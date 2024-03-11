@@ -48,3 +48,6 @@ class Tape(list[int]):
 
         return string
 
+
+    def __repr__(self) -> str:
+        return f"Tape: size={len(self)}, pointer={self.__pointer}, byte={self.byte}"
