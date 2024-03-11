@@ -85,11 +85,18 @@ class Interpreter(Tape):
     def run(self, _input: list[int | str] | str, to_string: Literal[1, True] | None = None) -> list[int] | str:
         
         self.input = [i if isinstance(i, int) else ord(i) for i in _input]
+        self.output = []
 
-        output = self.__run()
+        self.__run()
 
-        return "".join(map(chr, output)) if to_string else output
+        return "".join(map(chr, self.output)) if to_string else self.output
 
 
     def __run(self) -> list[int]:
-        return []
+        
+        for a, *b in self.__parse():
+            a(*b)
+        
+        return self.output
+
+
