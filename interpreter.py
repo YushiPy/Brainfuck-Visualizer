@@ -1,12 +1,15 @@
 
 from typing import Callable, Literal, overload
+
 from constants import SIZE
 from tape import Tape
+from exceptions import MismatchedBrackets
 
 type Routine = list[tuple[Callable[[], None]] | 
                     tuple[Callable[[int], None], int] | 
                     tuple[Callable[[int, int], None], int, int] |
                     tuple[Callable[[Routine], None], Routine]]
+
 
 class Interpreter(Tape):
     
@@ -34,10 +37,16 @@ class Interpreter(Tape):
         """
         
         count = 1
+        start = index
         
-        while count:
-            index += 1
-            count += (self.code[index] == '[') - (self.code[index] == ']')
+        for index, char in enumerate(self.code[index + 1:], start + 1):
+            
+            count += (char == '[') - (char == ']')
+        
+            if not count: break
+        
+        if count:
+            raise MismatchedBrackets.mismatched(self.code, start, count)
         
         return index
     

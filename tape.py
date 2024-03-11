@@ -1,16 +1,6 @@
 
 from constants import SIZE
-
-class PointerOutOfBound(Exception):
-
-    @staticmethod
-    def negative_pointer(index: int) -> "PointerOutOfBound":
-        return PointerOutOfBound(f"Tried to move to negative index; pointer = {index};")
-
-    @staticmethod
-    def too_big_pointer(index: int, size: int) -> "PointerOutOfBound":
-        return PointerOutOfBound(f"Tried to move beyond last byte; pointer = {index:_} >= size = {size:_}")
-
+from exceptions import PointerOutOfBound
 
 class Tape(list[int]):
     
