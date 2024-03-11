@@ -44,7 +44,7 @@ class Interpreter(Tape):
     def __parse(self, start: int | None = None, end: int | None = None) -> Routine:
         
         if start is None: start = 0
-        if end is None: end = len(self.code)
+        if end is None: end = len(self.code) # end represents an exclusive index
         
         index = start
         routine: Routine = []
@@ -65,14 +65,18 @@ class Interpreter(Tape):
                 continue
             
             inside_end = self.find_match(index)
-            inside_routine = self.__parse(index + 1, inside_end - 1) # +1 and -1 to remove brackets
+            inside_routine = self.__parse(index + 1, inside_end) # +1 remove brackets, end is exclusive already
 
             def inside() -> None:
                 
-                for a, *b in inside_routine:
-                    a(*b)
+                while self.byte:
+                
+                    for a, *b in inside_routine:
+                        a(*b)
             
             routine.append((inside,))
+            
+            index = inside_end + 1
         
         return routine
 
