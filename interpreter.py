@@ -14,7 +14,7 @@ class Interpreter(Tape):
         
         self.code = "".join(filter(set("><+-[],.").__contains__, code))
 
-        self.input: list[int] = []
+        self.input: list[int] = [0] # input is popped from the top until reaching 0
         self.output: list[int] = []
 
 
@@ -84,7 +84,7 @@ class Interpreter(Tape):
     
     def run(self, _input: list[int | str] | str, to_string: Literal[1, True] | None = None) -> list[int] | str:
         
-        self.input = [i if isinstance(i, int) else ord(i) for i in _input]
+        self.input = [0] + [i if isinstance(i, int) else ord(i) for i in _input][::-1]
         self.output = []
 
         self.__run()
@@ -98,5 +98,3 @@ class Interpreter(Tape):
             a(*b)
         
         return self.output
-
-
