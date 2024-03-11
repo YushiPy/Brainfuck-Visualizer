@@ -1,11 +1,23 @@
 
 from constants import SIZE
 
+class PointerOutOfBound(Exception):
+
+    @staticmethod
+    def negative_pointer(index: int) -> "PointerOutOfBound":
+        return PointerOutOfBound(f"Tried to move to negative index; pointer = {index};")
+
+    @staticmethod
+    def too_big_pointer(index: int, size: int) -> "PointerOutOfBound":
+        return PointerOutOfBound(f"Tried to move beyond last byte; pointer = {index:_} >= size = {size:_}")
+
 
 class Tape(list[int]):
     
     def __init__(self, size: int = SIZE) -> None:
         super().__init__([0] * size)
+        
+        self.size = size
         
         self.__pointer = 0
         self.__maximum = 0
@@ -36,6 +48,12 @@ class Tape(list[int]):
 
         self.__pointer = index
         self.__maximum = max(self.__pointer, self.__maximum)
+        
+        if self.__pointer < 0:
+            raise PointerOutOfBound.negative_pointer(self.__pointer)
+    
+        if self.__pointer >= self.size:
+            raise PointerOutOfBound.too_big_pointer(self.__pointer, self.size)
     
     
     def __str__(self) -> str:
