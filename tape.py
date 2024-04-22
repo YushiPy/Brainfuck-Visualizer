@@ -1,5 +1,5 @@
 
-from constants import SIZE
+from settings import SIZE
 from exceptions import PointerOutOfBound
 
 class Tape(list[int]):

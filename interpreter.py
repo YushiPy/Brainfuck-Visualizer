@@ -1,9 +1,10 @@
 
 from typing import Callable, Literal, overload
 
-from constants import SIZE
 from tape import Tape
 from exceptions import MismatchedBrackets
+
+import settings
 
 type Routine = list[tuple[Callable[[], None]] | 
                     tuple[Callable[[int], None], int] | 
@@ -13,7 +14,7 @@ type Routine = list[tuple[Callable[[], None]] |
 
 class Interpreter(Tape):
     
-    def __init__(self, code: str, size: int = SIZE) -> None:
+    def __init__(self, code: str, size: int = settings.SIZE) -> None:
         super().__init__(size)
         
         self.code = "".join(filter(set("><+-[],.").__contains__, code))
@@ -54,6 +55,10 @@ class Interpreter(Tape):
     def execute_routine(self, routine: Routine) -> None:
         
         for a, *b in routine: 
+            
+            if settings.PRINT_LINE:
+                print(self)
+            
             a(*b) # type: ignore
     
     

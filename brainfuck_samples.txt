@@ -1,0 +1,24 @@
+
+Converts Number to base x;
+
+[0; 0; Number; mod1; 0; result; mod2]
+
+>> , >>>> +++++ +++++ <<<< // Sets up Number and mod2 (base)
+
+[
+    [
+        - > + >>> - // increases mod1 and decreases mod2 (base)
+        [>] <<< // If mod2; then go to middle 0; else go to mod1
+        [- >>> + <<<] // If at mod1; move it to mod2; restoring base
+        >>> // Goes to next(&mod2) if mod2 else mod2
+        [< + >>] // If at mod2; increase total by 1
+        <<<<< // Goes back to Number
+    ] 
+    
+    < - > +++++ ++ [- < +++++ ++ >] // Sets up 48
+    > [- << + >>>>> + <<<] >> // Finishes the mod digit and restores mod2 (base)
+    [- << + >>] > // Moves result to Number
+    [- > + <] // Moves mod2 to the right
+    <<< // Goes back to Number
+]
+<< [. <] // Prints the digits

@@ -1,0 +1,3 @@
+
+SIZE = 30_000
+PRINT_LINE = False
