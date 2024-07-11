@@ -3,11 +3,10 @@ from interpreter import Interpreter
 
 import settings
 
-settings.PRINT_LINE = False
+settings.PRINT_LINE = True
 code = """
 >>> , > , [- > + >> + <<<]
 < [- >> - [<] <]
-
 """
 """
 >> , >>>> +++++ +++++ +++++ + <<<< 
