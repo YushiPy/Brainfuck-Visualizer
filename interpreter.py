@@ -29,6 +29,7 @@ class Interpreter:
 
 		return result
 
+
 	def __init__(self, code: str, size: int = TAPE_SIZE) -> None:
 		
 		self.code = "".join(filter(Characters.VALID_CHARACTERS.__contains__, code))
@@ -38,7 +39,8 @@ class Interpreter:
 		self.forward_map = {b : a for a, b in self.backward_map.items()}
 
 		self.actions: list[Callable[[int], None]] = []
-	
+
+
 	@overload
 	def run(self, _input: str | list[int], as_int: None) -> str: ...
 	@overload
@@ -53,6 +55,8 @@ class Interpreter:
 		
 		output: list[int] = []
 
+		debug: bool = False
+
 		index: int = 0
 		length: int = len(self.code)
 
@@ -66,12 +70,14 @@ class Interpreter:
 			elif char == Characters.LEFT:
 				self.tape.move_by(-1)
 			
+
 			elif char == Characters.INCREASE:
 				self.tape.increase(1)
 			
 			elif char == Characters.DECREASE:
 				self.tape.increase(-1)
 			
+
 			elif char == Characters.START_LOOP:
 				if not self.tape.byte:
 					index = self.forward_map[index]
@@ -79,12 +85,26 @@ class Interpreter:
 			elif char == Characters.END_LOOP:
 				index = self.backward_map[index] - 1
 			
+
 			elif char == Characters.PRINT:
 				output.append(self.tape.byte)
 
 			elif char == Characters.READ:
 				self.tape.set_value(_input.pop())
 			
+
+			elif char == Characters.TOGGLE_DEBUG:
+				debug = not debug
+			
+			elif char == Characters.SET_DEBUG:
+				debug = True
+
+			elif char == Characters.RESET_DEBUG:
+				debug = False
+
+			if debug:
+				print(self.tape)
+
 			index += 1
 
 		if as_int is None:
