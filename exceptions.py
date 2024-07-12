@@ -14,7 +14,7 @@ class MismatchedBrackets(Exception):
     @staticmethod
     def mismatched(code: str, index: int, depth: int) -> "MismatchedBrackets":
 
-        string = f"Couldn't find match for bracket at {index=}; " 
+        string: str = f"Couldn't find match for bracket at {index=}; " 
         string += f"{depth} closing bracket{'s' * (depth > 1)} missing in {code=};"
 
         return MismatchedBrackets(string)

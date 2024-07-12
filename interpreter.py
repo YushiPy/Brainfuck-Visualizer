@@ -1,123 +1,93 @@
 
-from typing import Callable, Literal, overload
+from typing import Callable, overload
 
 from tape import Tape
-from exceptions import MismatchedBrackets
+from settings import TAPE_SIZE, Characters
 
-import settings
+class Interpreter:
+	
+	code: str
+	tape: Tape
 
-type Routine = list[tuple[Callable[[], None]] | 
-                    tuple[Callable[[int], None], int] | 
-                    tuple[Callable[[int, int], None], int, int] |
-                    tuple[Callable[[Routine], None], Routine]]
+	forward_map: dict[int, int]
+	backward_map: dict[int, int]
 
+	@staticmethod
+	def make_map(code: str) -> dict[int, int]:
 
-class Interpreter(Tape):
-    
-    def __init__(self, code: str, size: int = settings.SIZE) -> None:
-        super().__init__(size)
-        
-        self.code = "".join(filter(set("><+-[],.").__contains__, code))
+		result: dict[int, int] = {}
 
-        self.input: list[int] = [0] # input is popped from the top until reaching 0
-        self.output: list[int] = []
+		indeces: list[int] = []
 
+		for i, a in enumerate(code):
 
-    def read_byte(self) -> None:
-        self.byte = self.input.pop()
-    
-    
-    def output_byte(self) -> None:
-        self.output.append(self.byte)
-    
-    
-    def find_match(self, index: int) -> int:
-        """
-        returns the index of the matching closing bracket
-        `index` shoud be the index of the opening bracket
-        """
-        
-        count = 1
-        start = index
-        
-        for index, char in enumerate(self.code[index + 1:], start + 1):
-            
-            count += (char == '[') - (char == ']')
-        
-            if not count: break
-        
-        if count:
-            raise MismatchedBrackets.mismatched(self.code, start, count)
-        
-        return index
-    
-    
-    def execute_routine(self, routine: Routine) -> None:
-        
-        for a, *b in routine: 
-            
-            if settings.PRINT_LINE:
-                print(self)
-            
-            a(*b) # type: ignore
-    
-    
-    def do_while(self, routine: Routine) -> None:
-        
-        while self.byte:
-            self.execute_routine(routine)
-    
-    
-    def __parse(self, start: int | None = None, end: int | None = None) -> Routine:
-        
-        if start is None: start = 0
-        if end is None: end = len(self.code) # end represents an exclusive index
-        
-        index = start
-        routine: Routine = []
-        
-        while index < end:
-            
-            char = self.code[index]
-            
-            if char == '>': routine.append((self.move_by, 1))
-            if char == '<': routine.append((self.move_by, -1))
-            if char == '+': routine.append((self.increase, 1))
-            if char == '-': routine.append((self.increase, -1))
-            if char == ',': routine.append((self.read_byte,))
-            if char == '.': routine.append((self.output_byte,))
-            
-            if char != '[': 
-                index += 1
-                continue
-            
-            inside_end = self.find_match(index)
-            inside_routine = self.__parse(index + 1, inside_end) # +1 remove brackets, end is exclusive already
-            
-            routine.append((self.do_while, inside_routine))
-            
-            index = inside_end + 1
-        
-        return routine
+			if a == Characters.START_LOOP:
+				indeces.append(i)
+			
+			elif a == Characters.END_LOOP:
+				result[i] = indeces.pop()
 
-    
-    @overload
-    def run(self, _input: list[int | str] | str) -> list[int]: ...
-    @overload
-    def run(self, _input: list[int | str] | str, to_string: Literal[1, True]) -> str: ...
-    
-    def run(self, _input: list[int | str] | str, to_string: Literal[1, True] | None = None) -> list[int] | str:
-        
-        self.input = [0] + [i if isinstance(i, int) else ord(i) for i in _input][::-1]
-        self.output = []
+		return result
 
-        self.__run()
+	def __init__(self, code: str, size: int = TAPE_SIZE) -> None:
+		
+		self.code = "".join(filter(Characters.VALID_CHARACTERS.__contains__, code))
+		self.tape: Tape = Tape(size)
 
-        return "".join(map(chr, self.output)) if to_string else self.output
+		self.backward_map = Interpreter.make_map(self.code)
+		self.forward_map = {b : a for a, b in self.backward_map.items()}
 
+		self.actions: list[Callable[[int], None]] = []
+	
+	@overload
+	def run(self, _input: str | list[int], as_int: None) -> str: ...
+	@overload
+	def run(self, _input: str | list[int], as_int: int = 0) -> list[int]: ...
 
-    def __run(self) -> list[int]:
+	def run(self, _input: str | list[int], as_int: int | None = None) -> str | list[int]:
 
-        self.execute_routine(self.__parse())
-        
-        return self.output
+		if isinstance(_input, str):
+			_input = list(map(ord, _input))
+
+		_input.reverse()
+		
+		output: list[int] = []
+
+		index: int = 0
+		length: int = len(self.code)
+
+		while index < length:
+			
+			char: str = self.code[index]
+
+			if char == Characters.RIGHT:
+				self.tape.move_by(1)
+
+			elif char == Characters.LEFT:
+				self.tape.move_by(-1)
+			
+			elif char == Characters.INCREASE:
+				self.tape.increase(1)
+			
+			elif char == Characters.DECREASE:
+				self.tape.increase(-1)
+			
+			elif char == Characters.START_LOOP:
+				if not self.tape.byte:
+					index = self.forward_map[index]
+			
+			elif char == Characters.END_LOOP:
+				index = self.backward_map[index] - 1
+			
+			elif char == Characters.PRINT:
+				output.append(self.tape.byte)
+
+			elif char == Characters.READ:
+				self.tape.set_value(_input.pop())
+			
+			index += 1
+
+		if as_int is None:
+			return "".join(map(chr, output))
+
+		return output
