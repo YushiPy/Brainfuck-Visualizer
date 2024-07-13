@@ -2,7 +2,16 @@
 from typing import Callable
 
 def _copy(count: str) -> str:
-    
+	"""
+	Returns a code snippet for copying the byte at the current location
+	`count` spaces ahead. 
+	
+	Will trash the byte 2 spaces ahead of the destination.
+
+	Parameter:
+	- `count`: Must represent a base `10` integer.
+	"""
+	
 	shift: int = int(count)
 
 	right: str = ">" * shift
@@ -11,7 +20,5 @@ def _copy(count: str) -> str:
 	return f"{right}[-]>>[-]<<{left}[-{right}+>>+<<{left}]{right}>>[-<<{left}+{right}>>]<<{left}"
 
 MACROS: dict[str, Callable[[str], str]] = {
-
-	# [a, x, x, x, x] -> [a, x, a, x, 0]
-	r"copy": _copy,
+	"copy": _copy,
 }
