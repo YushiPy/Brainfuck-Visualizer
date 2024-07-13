@@ -50,23 +50,27 @@ class Interpreter:
 				index += 1
 				continue
 			
+			marker: int = index
+
 			index += 1
 
-			buffer: str = ""
-
-			while buffer not in MACROS and index < length:
-				buffer += code[index]
+			while index < length and code[index] != '(':
 				index += 1
 
-			if buffer not in MACROS:
-				raise InvalidMacro.invalid_name(buffer)
+			if index == length and code[index] != '(':
+				raise InvalidMacro.no_args(code[marker + 1: index], marker)
+
+			macro_name: str = code[marker + 1: index]
+
+			if macro_name not in MACROS:
+				raise InvalidMacro.invalid_name(macro_name, marker)
 			
-			func: Callable[..., str] = MACROS[buffer]
+			index += 1
+
+			func: Callable[..., str] = MACROS[macro_name]
 
 			start: int = index
 			count: int = 1
-
-			index += 1
 
 			while count and index < length:
 
@@ -74,10 +78,16 @@ class Interpreter:
 				index += 1
 			
 			if count:
-				raise InvalidMacro.mismatched_parenthesis(buffer, start)
+				raise InvalidMacro.mismatched_parenthesis(macro_name, start)
 			
-			args: str = code[start + 1: index - 1]
-			result += func(args)
+			args: str = code[start: index - 1]
+
+			try:
+				macro_result: str = func(args)
+			except ValueError:
+				raise InvalidMacro.invalid_args(macro_name, args)
+
+			result += macro_result
 
 			index += 1
 

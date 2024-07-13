@@ -22,8 +22,8 @@ class MismatchedBrackets(Exception):
 class InvalidMacro(Exception):
 
 	@staticmethod
-	def invalid_name(name: str) -> "InvalidMacro":
-		return InvalidMacro(f"Macro \"{name}\" does not exist.")
+	def invalid_name(name: str, index: int) -> "InvalidMacro":
+		return InvalidMacro(f"No macro named {repr(name)} at index={index}.")
 
 	@staticmethod
 	def mismatched_parenthesis(macro: str, index: int) -> "InvalidMacro":
@@ -31,3 +31,11 @@ class InvalidMacro(Exception):
 		string: str = f"Couldn't match parenthesis at index={index} for macro=\"{macro}\"."
 
 		return InvalidMacro(string)
+
+	@staticmethod
+	def no_args(name: str, index: int) -> "InvalidMacro":
+		return InvalidMacro(f"No call for macro={repr(name)} at index={index}.")
+	
+	@staticmethod
+	def invalid_args(name: str, args: str) -> "InvalidMacro":
+		return InvalidMacro(f"Invalid argument={repr(args)} for macro named {name}.")
