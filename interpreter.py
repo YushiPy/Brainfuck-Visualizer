@@ -57,7 +57,7 @@ class Interpreter:
 			while index < length and code[index] != '(':
 				index += 1
 
-			if index == length and code[index] != '(':
+			if index == length or code[index] != '(':
 				raise InvalidMacro.no_args(code[marker + 1: index], marker)
 
 			macro_name: str = code[marker + 1: index]
