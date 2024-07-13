@@ -89,8 +89,6 @@ class Interpreter:
 
 			result += macro_result
 
-			index += 1
-
 		return result
 
 

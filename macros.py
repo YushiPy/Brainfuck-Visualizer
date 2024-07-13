@@ -1,15 +1,25 @@
 
 from typing import Callable
 
+"""
+Ascii names, such as `a` or `b` represent a byte.
+`x` represents an arbitrary byte.
+"""
+
 def _copy(count: str) -> str:
 	"""
 	Returns a code snippet for copying the byte at the current location
 	`count` spaces ahead. 
-	
-	Will trash the byte 2 spaces ahead of the destination.
 
-	Parameter:
-	- `count`: Must represent a base `10` integer.
+	Paramete
+	--------
+	- `count`: Must represent a base `10` integer. 
+	Represents the distance between the source and result.
+
+	Results
+	-------
+	Initial: `[a, ...]`.
+	Final: `[a, x_1, ...,  x_count, a, x, 0]`.
 	"""
 	
 	shift: int = int(count)
@@ -19,6 +29,33 @@ def _copy(count: str) -> str:
 
 	return f"{right}[-]>>[-]<<{left}[-{right}+>>+<<{left}]{right}>>[-<<{left}+{right}>>]<<{left}"
 
+def _eq(on_stack: str) -> str:
+	"""
+	Returns a code snippet for comparing two bytes at information level.
+	
+	Parameter
+	--------
+	- `on_stack == 0`: Returns a comparison on stack level.
+	- `on_stack != 0`: Returns a comparison on information level.
+
+	Results
+	-------
+	Initial = `[a, x, b, x, x, x]`.
+
+	Final = {
+	- `on_stack == 0`: `[a, x, b, x, a == b, x, 0, x, 0]`.
+	- `on_stack != 0`: `[a, a == b, b, 0, x, 0]`.
+	}
+	"""
+
+	flag: bool = on_stack == "0"
+
+	if not flag:
+		return ">[-]>>[-]<<<[->+>>+<<<]>>>[-<<<+>>>]<<<>>>[-]>>[-]<<<[->+>>+<<<]>>>[-<<<+>>>]<<<>[-<<->>]+<<[[-]>>-<<]>>[-<<+>>]<<<"
+
+	return ">>>>[-]>>[-]<<<<<<[->>>>+>>+<<<<<<]>>>>>>[-<<<<<<+>>>>>>]<<<<<<>>>>>>[-]>>[-]<<<<<<[->>>>+>>+<<<<<<]>>>>>>[-<<<<<<+>>>>>>]<<<<<<>>[->>-<<]+>>[[-]<<->>]<<<<<<"
+
 MACROS: dict[str, Callable[[str], str]] = {
 	"copy": _copy,
+	"eq": _eq
 }
