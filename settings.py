@@ -18,6 +18,9 @@ class Characters:
 	SET_DEBUG: str = '*'
 	RESET_DEBUG: str = '!'
 
+
+	MACRO_CHAR: str = "@"
+
 	VALID_CHARACTERS: set[str] = {
 		
 		RIGHT, LEFT, 
@@ -25,7 +28,8 @@ class Characters:
 		START_LOOP, END_LOOP, 
 		PRINT, READ,
 
-		TOGGLE_DEBUG, SET_DEBUG, RESET_DEBUG
+		TOGGLE_DEBUG, SET_DEBUG, RESET_DEBUG,
+		MACRO_CHAR
 	}
 
 

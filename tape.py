@@ -1,4 +1,5 @@
 
+from random import randint
 from exceptions import PointerOutOfBound
 from settings import TAPE_SIZE
 
@@ -65,6 +66,15 @@ class Tape(list[int]):
 			raise PointerOutOfBound.too_big_pointer(self.__pointer, self.size)
 	
 	
+	def trash(self, start: int = 0, end: int | None = None, step: int = 1) -> None:
+		"""Adds random numbers (trash) to the sepecified slice. Serves mostly for testing."""
+
+		if end is None:
+			end = len(self)
+		
+		for i in range(start, end, step):
+			self.set_value(randint(0, 255), i)
+
 	def __str__(self) -> str:
 
 		pointer_index: int = (self.__pointer and len(str(self[:self.__pointer]))) + (len(str(self.byte)) + 1) // 2

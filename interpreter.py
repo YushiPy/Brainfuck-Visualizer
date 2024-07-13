@@ -1,8 +1,10 @@
 
 from typing import Callable, overload
 
+from exceptions import InvalidMacro
 from tape import Tape
 from settings import TAPE_SIZE, Characters
+from macros import MACROS
 
 class Interpreter:
 	
@@ -29,16 +31,66 @@ class Interpreter:
 
 		return result
 
+	@staticmethod
+	def parse_code(code: str) -> str:
+
+		result: str = ""
+
+		index: int = 0
+		length: int = len(code)
+
+		while index < length:
+
+			if code[index] not in Characters.VALID_CHARACTERS:
+				index += 1
+				continue
+
+			if code[index] != Characters.MACRO_CHAR:
+				result += code[index]
+				index += 1
+				continue
+			
+			index += 1
+
+			buffer: str = ""
+
+			while buffer not in MACROS and index < length:
+				buffer += code[index]
+				index += 1
+
+			if buffer not in MACROS:
+				raise InvalidMacro.invalid_name(buffer)
+			
+			func: Callable[..., str] = MACROS[buffer]
+
+			start: int = index
+			count: int = 1
+
+			index += 1
+
+			while count and index < length:
+
+				count += (code[index] == '(') - (code[index] == ')')
+				index += 1
+			
+			if count:
+				raise InvalidMacro.mismatched_parenthesis(buffer, start)
+			
+			args: str = code[start + 1: index - 1]
+			result += func(args)
+
+			index += 1
+
+		return result
+
 
 	def __init__(self, code: str, size: int = TAPE_SIZE) -> None:
 		
-		self.code = "".join(filter(Characters.VALID_CHARACTERS.__contains__, code))
-		self.tape: Tape = Tape(size)
+		self.code = Interpreter.parse_code(code)
+		self.tape = Tape(size)
 
 		self.backward_map = Interpreter.make_map(self.code)
 		self.forward_map = {b : a for a, b in self.backward_map.items()}
-
-		self.actions: list[Callable[[int], None]] = []
 
 
 	@overload
